@@ -1,17 +1,53 @@
-# hisab_plus
+# Hisab Plus
 
-A new Flutter project.
+A Flutter-based customer ledger management application developed as part of a mobile app development internship assignment.
 
-## Getting Started
+## 📱 About the Project
 
-This project is a starting point for a Flutter application.
+**Hisab Plus** is a simple and user-friendly Flutter application designed to authenticate users and display customer information in a paginated list.
 
-A few resources to get you started if this is your first Flutter project:
+The project focuses on clean UI, API integration, state management, error handling, and maintainable code structure.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## ✨ Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 🔐 User authentication
+- 👥 Customer list
+- 📄 Paginated customer data
+- 👤 Customer details
+- 🖼️ Customer profile images
+- ⚠️ Proper API error handling
+- 🔄 Loading and pagination states
+- 📱 Responsive and user-friendly UI
+- 🧩 Provider state management
+- 🏗️ Clean and organized project structure
+
+## 🛠️ Technologies Used
+
+- **Flutter**
+- **Dart**
+- **Provider** – State management
+- **REST API** – Backend communication
+- **Google Fonts** – Typography
+
+## 📂 Project Structure
+
+The project follows a feature-based structure to keep the code organized and maintainable.
+
+```text
+lib/
+├── app/
+├── core/
+├── features/
+│   ├── auth/
+│   ├── customer/
+│   └── shared/
+└── main.dart
+
+👨‍💻 Developer
+
+Md. Rifat Hossain
+
+Flutter & Android Developer
+
+GitHub: https://github.com/rifatHossainDevs
+LinkedIn: https://www.linkedin.com/in/md-rifat-hossain-0014a7237/
