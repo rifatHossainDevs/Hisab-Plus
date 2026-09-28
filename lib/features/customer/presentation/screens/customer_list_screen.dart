@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hisab_plus/features/shared/presentation/widgets/show_snackbar_message.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app/app_color.dart';
@@ -24,6 +26,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   final CustomerListProvider _customerListProvider = CustomerListProvider();
 
   String _searchQuery = '';
+
+  DateTime? lastPressed;
 
   @override
   void initState() {
@@ -65,152 +69,185 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _customerListProvider,
-      child: ScreenBackground(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            'DOMINATE SOFTWARE',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white.withAlpha(400),
-                            ),
-                          ),
-                          Text(
-                            'Customers',
-                            style: GoogleFonts.poppins(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
+      child: PopScope(
+        canPop: false,
 
-                      const Spacer(),
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
 
-                      IconButton(
-                        onPressed: () {
-                          _customerListProvider.refreshCustomerList();
-                        },
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                      ),
-                    ],
-                  ),
+          final now = DateTime.now();
 
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _searchTEController,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintStyle: GoogleFonts.poppins(color: Colors.grey),
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, color: Colors.grey),
-                              onPressed: () {
-                                _searchTEController.clear();
-                              },
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: const Color(0xFFFAFCFB),
-                    ),
-                  ),
+          if (lastPressed == null ||
+              now.difference(lastPressed!) > const Duration(seconds: 2)) {
+            lastPressed = now;
 
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Consumer<CustomerListProvider>(
-                builder: (context, _, _) {
-                  if (_customerListProvider.initialLoading) {
-                    return CenteredProgressIndicator();
-                  }
-
-                  final filteredCustomers = _getFilteredCustomers(
-                    _customerListProvider.customerList,
-                  );
-
-                  if (filteredCustomers.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No Customer Found',
-                        style: TextStyle(fontSize: 20, color: Colors.grey),
-                      ),
-                    );
-                  }
-
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            showSnackBarMessage(context, 'Press again to exit');
+          } else {
+            SystemNavigator.pop();
+          }
+        },
+        child: ScreenBackground(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16, top: 16),
-                          child: Text(
-                            "Total customers: ${_customerListProvider.totalCustomer}",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColor.themeColor,
+                        Column(
+                          children: [
+                            Text(
+                              'DOMINATE SOFTWARE',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white.withAlpha(400),
+                              ),
                             ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: ListView.separated(
-                              controller: _scrollController,
-                              itemBuilder: (context, index) {
-                                return CustomerCard(
-                                  customerModel: filteredCustomers[index],
-                                );
-                              },
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 16),
-                              itemCount: filteredCustomers.length,
+                            Text(
+                              'Customers',
+                              style: GoogleFonts.poppins(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
 
-                        if (_customerListProvider.isLoadingMore)
-                          const LinearProgressIndicator(),
+                        const Spacer(),
+
+                        IconButton(
+                          onPressed: () {
+                            _customerListProvider.refreshCustomerList();
+                          },
+                          icon: const Icon(Icons.refresh, color: Colors.white),
+                        ),
                       ],
                     ),
-                  );
-                },
+
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _searchTEController,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintStyle: GoogleFonts.poppins(color: Colors.grey),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.grey,
+                        ),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  _searchTEController.clear();
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: const Color(0xFFFAFCFB),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Consumer<CustomerListProvider>(
+                  builder: (context, _, _) {
+                    if (_customerListProvider.initialLoading) {
+                      return CenteredProgressIndicator();
+                    }
+
+                    final filteredCustomers = _getFilteredCustomers(
+                      _customerListProvider.customerList,
+                    );
+
+                    if (filteredCustomers.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No Customer Found',
+                          style: TextStyle(fontSize: 20, color: Colors.grey),
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 16),
+                            child: Text(
+                              "Total customers: ${_customerListProvider.totalCustomer}",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColor.themeColor,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                itemBuilder: (context, index) {
+                                  return CustomerCard(
+                                    customerModel: filteredCustomers[index],
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 16),
+                                itemCount: filteredCustomers.length,
+                              ),
+                            ),
+                          ),
+
+                          if (_customerListProvider.isLoadingMore)
+                            _buildBottomLinearProgressIndicator(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBottomLinearProgressIndicator() {
+    return Column(
+      children: [
+        const LinearProgressIndicator(),
+        const SizedBox(height: 8),
+      ],
     );
   }
 
